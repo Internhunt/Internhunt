@@ -1,20 +1,25 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Upload, Check, Plus, X } from 'lucide-react';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
+import { parseResume } from '@/utils/resumeParser';
+import { useUser } from '@/contexts/UserContext';
 
 const UploadPage = () => {
   const [file, setFile] = useState<File | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [processed, setProcessed] = useState(false);
   const [manualEntry, setManualEntry] = useState(false);
   const [skills, setSkills] = useState('');
   const { toast } = useToast();
   const [fileError, setFileError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  
+  // Get user context
+  const { setUserSkills, setIsProcessed } = useUser();
 
   // Handle file error toast with useEffect to avoid React warning
   useEffect(() => {
@@ -63,17 +68,7 @@ const UploadPage = () => {
     }
   };
 
-  // Use useEffect for analysis success toast
-  useEffect(() => {
-    if (processed) {
-      toast({
-        title: "Skills extracted successfully!",
-        description: "We've analyzed your profile and found matching opportunities.",
-      });
-    }
-  }, [processed, toast]);
-
-  const handleAnalyze = () => {
+  const handleAnalyze = async () => {
     if (!file && !manualEntry) {
       toast({
         title: "No input provided",
@@ -94,24 +89,64 @@ const UploadPage = () => {
 
     setIsProcessing(true);
     
-    // Simulate processing
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsProcessing(false);
-          setProcessed(true);
-          return 100;
-        }
-        return prev + 10;
+    try {
+      let extractedSkills: string[] = [];
+      
+      if (manualEntry) {
+        // Parse manual skills entry
+        extractedSkills = skills
+          .split(',')
+          .map(skill => skill.trim())
+          .filter(skill => skill.length > 0);
+      } else if (file) {
+        // Simulate progress updates
+        const progressInterval = setInterval(() => {
+          setProgress(prev => {
+            if (prev >= 90) {
+              clearInterval(progressInterval);
+              return 90;
+            }
+            return prev + 10;
+          });
+        }, 300);
+        
+        // Parse the resume
+        extractedSkills = await parseResume(file);
+        
+        clearInterval(progressInterval);
+        setProgress(100);
+      }
+      
+      // Update user context with extracted skills
+      setUserSkills(extractedSkills);
+      setIsProcessed(true);
+      
+      // Show success toast
+      toast({
+        title: "Skills extracted successfully!",
+        description: "We've analyzed your profile and found matching opportunities.",
       });
-    }, 300);
+      
+      // Redirect to matches page after a short delay
+      setTimeout(() => {
+        navigate('/matches');
+      }, 1500);
+      
+    } catch (error) {
+      toast({
+        title: "Processing error",
+        description: "There was an error processing your input. Please try again.",
+        variant: "destructive",
+      });
+      console.error("Error processing input:", error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleRemoveFile = () => {
     setFile(null);
     setProgress(0);
-    setProcessed(false);
   };
 
   return (
@@ -219,27 +254,13 @@ const UploadPage = () => {
           )}
 
           <div className="flex justify-center">
-            {!processed ? (
-              <button
-                onClick={handleAnalyze}
-                className="button-primary"
-                disabled={isProcessing}
-              >
-                {isProcessing ? 'Analyzing...' : 'Analyze'}
-              </button>
-            ) : (
-              <div className="flex flex-col items-center">
-                <div className="mb-6 flex items-center">
-                  <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
-                    <Check size={20} />
-                  </div>
-                  <p className="font-medium text-green-600">Skills extracted successfully!</p>
-                </div>
-                <Link to="/matches" className="button-accent">
-                  See Your Matches
-                </Link>
-              </div>
-            )}
+            <button
+              onClick={handleAnalyze}
+              className="button-primary"
+              disabled={isProcessing}
+            >
+              {isProcessing ? 'Analyzing...' : 'Analyze'}
+            </button>
           </div>
         </div>
       </div>

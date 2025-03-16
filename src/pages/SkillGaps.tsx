@@ -1,21 +1,54 @@
 
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import SkillGapCard from '@/components/SkillGapCard';
 import Footer from '@/components/Footer';
-
-// Mock data for skill gaps
-const mockSkillGaps = [
-  { id: 1, skill: 'Machine Learning', importance: 'High' as const },
-  { id: 2, skill: 'React.js', importance: 'High' as const },
-  { id: 3, skill: 'Docker', importance: 'Medium' as const },
-  { id: 4, skill: 'AWS', importance: 'Medium' as const },
-  { id: 5, skill: 'TypeScript', importance: 'High' as const },
-  { id: 6, skill: 'GraphQL', importance: 'Low' as const },
-];
+import { analyzeSkillGaps } from '@/services/internshipService';
+import { useUser } from '@/contexts/UserContext';
+import { useToast } from '@/hooks/use-toast';
 
 const SkillGaps = () => {
-  // Calculate skill coverage percentage
-  const skillCoverage = 65; // This would come from an actual calculation in a real app
+  const [skillGaps, setSkillGaps] = useState<{ skill: string; importance: 'High' | 'Medium' | 'Low' }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { userSkills, isProcessed } = useUser();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   
+  // Calculate skill coverage percentage - this would be more sophisticated in a real app
+  const skillCoverage = Math.min(65, Math.round((userSkills.length / (userSkills.length + skillGaps.length)) * 100));
+  
+  useEffect(() => {
+    // Check if user has processed a resume
+    if (!isProcessed) {
+      toast({
+        title: "No skills found",
+        description: "Please upload your resume or enter your skills first.",
+        variant: "destructive",
+      });
+      navigate('/upload');
+      return;
+    }
+    
+    const fetchSkillGaps = async () => {
+      try {
+        setLoading(true);
+        const gaps = await analyzeSkillGaps(userSkills);
+        setSkillGaps(gaps);
+      } catch (error) {
+        console.error("Error analyzing skill gaps:", error);
+        toast({
+          title: "Error analyzing skills",
+          description: "There was a problem analyzing your skill gaps. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSkillGaps();
+  }, [userSkills, isProcessed, navigate, toast]);
+
   return (
     <div className="min-h-screen bg-white pt-24">
       <div className="container-custom py-12">
@@ -66,25 +99,38 @@ const SkillGaps = () => {
             </div>
           </div>
 
-          <div className="bg-slate-50 rounded-xl p-8 mb-8">
-            <h2 className="text-xl font-semibold mb-6">Recommended Skills to Learn</h2>
-            <div className="space-y-4">
-              {mockSkillGaps.map((gap) => (
-                <SkillGapCard
-                  key={gap.id}
-                  skill={gap.skill}
-                  importance={gap.importance}
-                />
-              ))}
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
             </div>
-          </div>
+          ) : skillGaps.length > 0 ? (
+            <div className="bg-slate-50 rounded-xl p-8 mb-8">
+              <h2 className="text-xl font-semibold mb-6">Recommended Skills to Learn</h2>
+              <div className="space-y-4">
+                {skillGaps.map((gap, index) => (
+                  <SkillGapCard
+                    key={index}
+                    skill={gap.skill}
+                    importance={gap.importance}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center p-12 bg-slate-50 rounded-xl mb-8">
+              <h3 className="text-xl font-semibold mb-2">Great job!</h3>
+              <p className="text-secondary/70 mb-4">
+                Your skills align well with current internship requirements. Keep up the good work!
+              </p>
+            </div>
+          )}
 
           <div className="text-center">
             <p className="text-secondary/70 mb-4">
               Learning these skills will increase your match rate with top internships.
             </p>
             <button
-              onClick={() => window.location.href = '/courses'}
+              onClick={() => navigate('/courses')}
               className="button-primary"
             >
               Start Learning

@@ -1,58 +1,100 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import CourseCard from '@/components/CourseCard';
 import Footer from '@/components/Footer';
-
-// Mock data for courses
-const mockCourses = [
-  {
-    id: 1,
-    title: 'Machine Learning Fundamentals',
-    platform: 'Coursera',
-    duration: '8 weeks',
-    courseUrl: 'https://example.com',
-  },
-  {
-    id: 2,
-    title: 'React.js Complete Guide',
-    platform: 'Udemy',
-    duration: '24 hours',
-    courseUrl: 'https://example.com',
-  },
-  {
-    id: 3,
-    title: 'Docker for Developers',
-    platform: 'Pluralsight',
-    duration: '6 hours',
-    courseUrl: 'https://example.com',
-  },
-  {
-    id: 4,
-    title: 'AWS Certified Developer',
-    platform: 'AWS Training',
-    duration: '12 weeks',
-    courseUrl: 'https://example.com',
-  },
-  {
-    id: 5,
-    title: 'TypeScript Masterclass',
-    platform: 'Frontend Masters',
-    duration: '8 hours',
-    courseUrl: 'https://example.com',
-  },
-  {
-    id: 6,
-    title: 'GraphQL API Development',
-    platform: 'egghead.io',
-    duration: '4 hours',
-    courseUrl: 'https://example.com',
-  },
-];
+import { getAllCourses, getCoursesBySkill, getRecommendedCourses } from '@/services/courseService';
+import { analyzeSkillGaps } from '@/services/internshipService';
+import { useUser } from '@/contexts/UserContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Courses = () => {
   const [selectedSkill, setSelectedSkill] = useState('all');
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [progress, setProgress] = useState(3); // Number of completed courses
   const totalCourses = 6; // Total number of required courses
+  
+  const { userSkills, isProcessed } = useUser();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { toast } = useToast();
+  
+  // Extract skill from URL query param if present
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const skillParam = params.get('skill');
+    if (skillParam) {
+      setSelectedSkill(skillParam);
+    }
+  }, [location.search]);
+
+  useEffect(() => {
+    // Check if user has processed a resume
+    if (!isProcessed) {
+      toast({
+        title: "No skills found",
+        description: "Please upload your resume or enter your skills first.",
+        variant: "destructive",
+      });
+      navigate('/upload');
+      return;
+    }
+    
+    const fetchCourses = async () => {
+      try {
+        setLoading(true);
+        
+        if (selectedSkill === 'all') {
+          // Get skill gaps first
+          const skillGaps = await analyzeSkillGaps(userSkills);
+          
+          // Get recommended courses based on skill gaps
+          const recommendedCourses = await getRecommendedCourses(skillGaps);
+          setCourses(recommendedCourses);
+        } else {
+          // Get courses for specific skill
+          const skillCourses = await getCoursesBySkill(selectedSkill);
+          setCourses(skillCourses);
+        }
+      } catch (error) {
+        console.error("Error fetching courses:", error);
+        toast({
+          title: "Error fetching courses",
+          description: "There was a problem finding courses. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCourses();
+  }, [selectedSkill, userSkills, isProcessed, navigate, toast]);
+
+  // Get all available skills for the dropdown
+  const [availableSkills, setAvailableSkills] = useState<string[]>([]);
+  
+  useEffect(() => {
+    const fetchAllSkills = async () => {
+      try {
+        const allCourses = await getAllCourses();
+        const skills = new Set<string>();
+        
+        allCourses.forEach(course => {
+          course.skills.forEach((skill: string) => {
+            skills.add(skill);
+          });
+        });
+        
+        setAvailableSkills(Array.from(skills).sort());
+      } catch (error) {
+        console.error("Error fetching skills:", error);
+      }
+    };
+    
+    fetchAllSkills();
+  }, []);
 
   return (
     <div className="min-h-screen bg-white pt-24">
@@ -75,26 +117,37 @@ const Courses = () => {
                 className="px-4 py-2 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/50"
               >
                 <option value="all">All Skills</option>
-                <option value="machine-learning">Machine Learning</option>
-                <option value="react">React</option>
-                <option value="docker">Docker</option>
-                <option value="aws">AWS</option>
-                <option value="typescript">TypeScript</option>
-                <option value="graphql">GraphQL</option>
+                {availableSkills.map(skill => (
+                  <option key={skill} value={skill}>{skill}</option>
+                ))}
               </select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mockCourses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  title={course.title}
-                  platform={course.platform}
-                  duration={course.duration}
-                  courseUrl={course.courseUrl}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : courses.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {courses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    title={course.title}
+                    platform={course.platform}
+                    duration={course.duration}
+                    courseUrl={course.courseUrl}
+                    imageUrl={course.imageUrl}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center p-12 bg-slate-50 rounded-xl">
+                <h3 className="text-xl font-semibold mb-2">No courses found</h3>
+                <p className="text-secondary/70 mb-4">
+                  We couldn't find any courses for the selected skill. Try another skill from the dropdown.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="bg-slate-50 rounded-xl p-8">

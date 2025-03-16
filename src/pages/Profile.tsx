@@ -1,16 +1,33 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Download } from 'lucide-react';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const [name, setName] = useState('John Doe');
   const [email, setEmail] = useState('john.doe@example.com');
   const [selectedTags, setSelectedTags] = useState(['Tech', 'Remote']);
   const [newSkill, setNewSkill] = useState('');
-  const [skills, setSkills] = useState(['Python', 'React', 'Node.js', 'SQL']);
   const { toast } = useToast();
+  const navigate = useNavigate();
+  
+  // Get user context
+  const { userSkills, setUserSkills, isProcessed, clearUserData } = useUser();
+  
+  // Redirect if no resume processed
+  useEffect(() => {
+    if (!isProcessed) {
+      toast({
+        title: "Profile not found",
+        description: "Please upload your resume or enter your skills first.",
+        variant: "destructive",
+      });
+      navigate('/upload');
+    }
+  }, [isProcessed, navigate, toast]);
 
   const handleSave = () => {
     toast({
@@ -21,20 +38,20 @@ const Profile = () => {
 
   const handleAddSkill = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-      setSkills([...skills, newSkill.trim()]);
+    if (newSkill.trim() && !userSkills.includes(newSkill.trim())) {
+      setUserSkills([...userSkills, newSkill.trim()]);
       setNewSkill('');
     }
   };
 
   const handleRemoveSkill = (skillToRemove: string) => {
-    setSkills(skills.filter(skill => skill !== skillToRemove));
+    setUserSkills(userSkills.filter(skill => skill !== skillToRemove));
   };
 
   const handleExportData = () => {
     const data = {
       profile: { name, email, preferences: selectedTags },
-      skills,
+      skills: userSkills,
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -52,6 +69,19 @@ const Profile = () => {
       description: "Your profile data has been downloaded successfully.",
     });
   };
+  
+  const handleReset = () => {
+    clearUserData();
+    toast({
+      title: "Profile reset",
+      description: "Your profile has been reset. You'll be redirected to the upload page.",
+    });
+    setTimeout(() => navigate('/upload'), 1500);
+  };
+
+  if (!isProcessed) {
+    return null; // Will redirect via useEffect
+  }
 
   return (
     <div className="min-h-screen bg-white pt-24">
@@ -116,7 +146,7 @@ const Profile = () => {
               </form>
               
               <div className="flex flex-wrap gap-2">
-                {skills.map((skill) => (
+                {userSkills.map((skill) => (
                   <div
                     key={skill}
                     className="flex items-center bg-primary/10 text-primary rounded-full px-3 py-1"
@@ -197,13 +227,22 @@ const Profile = () => {
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <button
-                onClick={handleExportData}
-                className="button-secondary flex items-center"
-              >
-                <Download size={16} className="mr-2" />
-                Download My Data
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleExportData}
+                  className="button-secondary flex items-center"
+                >
+                  <Download size={16} className="mr-2" />
+                  Download My Data
+                </button>
+                
+                <button
+                  onClick={handleReset}
+                  className="button-secondary bg-red-50 text-red-600 hover:bg-red-100"
+                >
+                  Reset Profile
+                </button>
+              </div>
               
               <button
                 onClick={handleSave}
