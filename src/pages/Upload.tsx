@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Upload, Check, Plus, X } from 'lucide-react';
 import Footer from '@/components/Footer';
@@ -14,6 +14,19 @@ const UploadPage = () => {
   const [manualEntry, setManualEntry] = useState(false);
   const [skills, setSkills] = useState('');
   const { toast } = useToast();
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  // Handle file error toast with useEffect to avoid React warning
+  useEffect(() => {
+    if (fileError) {
+      toast({
+        title: "Invalid file format",
+        description: fileError,
+        variant: "destructive",
+      });
+      setFileError(null);
+    }
+  }, [fileError, toast]);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -34,11 +47,7 @@ const UploadPage = () => {
       if (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         setFile(file);
       } else {
-        toast({
-          title: "Invalid file format",
-          description: "Please upload a PDF or DOCX file.",
-          variant: "destructive",
-        });
+        setFileError("Please upload a PDF or DOCX file.");
       }
     }
   };
@@ -49,14 +58,20 @@ const UploadPage = () => {
       if (file.type === 'application/pdf' || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
         setFile(file);
       } else {
-        toast({
-          title: "Invalid file format",
-          description: "Please upload a PDF or DOCX file.",
-          variant: "destructive",
-        });
+        setFileError("Please upload a PDF or DOCX file.");
       }
     }
   };
+
+  // Use useEffect for analysis success toast
+  useEffect(() => {
+    if (processed) {
+      toast({
+        title: "Skills extracted successfully!",
+        description: "We've analyzed your profile and found matching opportunities.",
+      });
+    }
+  }, [processed, toast]);
 
   const handleAnalyze = () => {
     if (!file && !manualEntry) {
@@ -86,12 +101,6 @@ const UploadPage = () => {
           clearInterval(interval);
           setIsProcessing(false);
           setProcessed(true);
-          
-          toast({
-            title: "Skills extracted successfully!",
-            description: "We've analyzed your profile and found matching opportunities.",
-          });
-          
           return 100;
         }
         return prev + 10;
