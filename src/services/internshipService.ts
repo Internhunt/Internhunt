@@ -1,154 +1,183 @@
 
-interface Internship {
+/**
+ * Internship service
+ * Handles fetching internship data and matching with user skills
+ */
+
+export interface Internship {
   id: number;
   title: string;
   company: string;
   location: string;
-  description: string;
   requiredSkills: string[];
+  description: string;
   applicationUrl: string;
 }
 
 // Mock internship data
-const internships: Internship[] = [
+// In a real app, this would come from an API
+const mockInternships: Internship[] = [
   {
     id: 1,
-    title: "Software Engineering Intern",
-    company: "Google",
-    location: "Mountain View, CA (Remote)",
-    description: "Join our team to build cutting-edge software solutions.",
-    requiredSkills: ["javascript", "react", "typescript", "git"],
-    applicationUrl: "https://careers.google.com"
+    title: "Frontend Developer Intern",
+    company: "TechCorp",
+    location: "San Francisco, CA (Remote)",
+    requiredSkills: ["javascript", "react", "html", "css", "git"],
+    description: "Join our team to build modern web applications with React.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 2,
-    title: "Data Science Intern",
-    company: "Microsoft",
-    location: "Seattle, WA",
-    description: "Work on real-world data analytics problems.",
-    requiredSkills: ["python", "sql", "machine learning", "pandas"],
-    applicationUrl: "https://careers.microsoft.com"
+    title: "Backend Developer Intern",
+    company: "DataSystems",
+    location: "New York, NY",
+    requiredSkills: ["python", "django", "sql", "api development", "git"],
+    description: "Work on our backend services and APIs using Python and Django.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 3,
-    title: "UX Design Intern",
-    company: "Apple",
-    location: "Cupertino, CA",
-    description: "Design intuitive interfaces for millions of users.",
-    requiredSkills: ["figma", "ui/ux", "sketch", "prototyping"],
-    applicationUrl: "https://www.apple.com/careers"
+    title: "Full Stack Developer Intern",
+    company: "WebSolutions",
+    location: "Austin, TX (Remote)",
+    requiredSkills: ["javascript", "react", "node.js", "express", "mongodb"],
+    description: "Develop full stack applications using the MERN stack.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 4,
-    title: "Frontend Developer Intern",
-    company: "Netflix",
-    location: "Los Gatos, CA (Remote)",
-    description: "Build responsive user interfaces for our streaming platform.",
-    requiredSkills: ["react", "css", "html", "javascript"],
-    applicationUrl: "https://jobs.netflix.com"
+    title: "Data Science Intern",
+    company: "AnalyticsPro",
+    location: "Seattle, WA",
+    requiredSkills: ["python", "sql", "machine learning", "data analysis", "pandas"],
+    description: "Apply machine learning techniques to real-world problems.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 5,
-    title: "Machine Learning Intern",
-    company: "Amazon",
-    location: "Seattle, WA",
-    description: "Apply ML techniques to solve complex business problems.",
-    requiredSkills: ["python", "machine learning", "tensorflow", "data analysis"],
-    applicationUrl: "https://www.amazon.jobs"
+    title: "Mobile Developer Intern",
+    company: "AppWorks",
+    location: "Los Angeles, CA",
+    requiredSkills: ["react native", "javascript", "mobile development", "api integration"],
+    description: "Build cross-platform mobile applications with React Native.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 6,
-    title: "Backend Engineer Intern",
-    company: "Facebook",
-    location: "Menlo Park, CA",
-    description: "Work on scalable backend services that power our platforms.",
-    requiredSkills: ["nodejs", "databases", "api design", "algorithms"],
-    applicationUrl: "https://www.facebook.com/careers"
+    title: "DevOps Intern",
+    company: "CloudTech",
+    location: "Chicago, IL (Remote)",
+    requiredSkills: ["aws", "docker", "kubernetes", "ci/cd", "linux"],
+    description: "Help automate our deployment pipeline and infrastructure.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 7,
-    title: "Mobile App Developer Intern",
-    company: "Uber",
-    location: "San Francisco, CA (Remote)",
-    description: "Develop mobile applications for our transportation platform.",
-    requiredSkills: ["react native", "javascript", "mobile development", "git"],
-    applicationUrl: "https://www.uber.com/careers"
+    title: "UI/UX Design Intern",
+    company: "DesignHub",
+    location: "Boston, MA",
+    requiredSkills: ["figma", "ui/ux", "responsive design", "wireframing", "user research"],
+    description: "Design intuitive and beautiful user interfaces for web and mobile apps.",
+    applicationUrl: "https://example.com/apply"
   },
   {
     id: 8,
-    title: "DevOps Intern",
-    company: "Twitter",
-    location: "San Francisco, CA",
-    description: "Help us improve our infrastructure and deployment processes.",
-    requiredSkills: ["docker", "kubernetes", "aws", "ci/cd"],
-    applicationUrl: "https://careers.twitter.com"
+    title: "Machine Learning Intern",
+    company: "AILabs",
+    location: "San Diego, CA",
+    requiredSkills: ["python", "machine learning", "deep learning", "tensorflow", "numpy"],
+    description: "Implement and optimize machine learning models for our products.",
+    applicationUrl: "https://example.com/apply"
   }
 ];
 
-// Function to calculate the match score between user skills and internship
+/**
+ * Calculate the match score between user skills and required skills
+ * @param userSkills The user's skills
+ * @param requiredSkills The required skills for the internship
+ * @returns A match score between 0 and 100
+ */
 const calculateMatchScore = (userSkills: string[], requiredSkills: string[]): number => {
-  if (userSkills.length === 0 || requiredSkills.length === 0) return 0;
-
-  const userSkillsLower = userSkills.map(skill => skill.toLowerCase());
-  const requiredSkillsLower = requiredSkills.map(skill => skill.toLowerCase());
+  if (!requiredSkills.length) return 0;
   
-  const matchedSkills = userSkillsLower.filter(skill => 
-    requiredSkillsLower.some(reqSkill => reqSkill.includes(skill) || skill.includes(reqSkill))
+  // Convert to lowercase for case-insensitive matching
+  const normalizedUserSkills = userSkills.map(skill => skill.toLowerCase());
+  const normalizedRequiredSkills = requiredSkills.map(skill => skill.toLowerCase());
+  
+  // Count matching skills
+  const matchingSkills = normalizedRequiredSkills.filter(skill => 
+    normalizedUserSkills.includes(skill)
   );
   
-  return Math.round((matchedSkills.length / requiredSkillsLower.length) * 100);
+  // Calculate match percentage
+  const score = (matchingSkills.length / normalizedRequiredSkills.length) * 100;
+  
+  return Math.round(score);
 };
 
-// Get internships matched to user skills
+/**
+ * Get all internships
+ * @returns A promise that resolves to an array of internships
+ */
+export const getAllInternships = async (): Promise<Internship[]> => {
+  // In a real app, this would fetch from an API
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return mockInternships;
+};
+
+/**
+ * Get internships matched to user skills
+ * @param userSkills The user's skills
+ * @returns A promise that resolves to an array of internships with match scores
+ */
 export const getMatchedInternships = async (userSkills: string[]): Promise<{internship: Internship, matchScore: number}[]> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Get all internships
+  const internships = await getAllInternships();
   
-  return internships.map(internship => ({
+  // Calculate match scores
+  const matchedInternships = internships.map(internship => ({
     internship,
     matchScore: calculateMatchScore(userSkills, internship.requiredSkills)
-  })).sort((a, b) => b.matchScore - a.matchScore);
+  }));
+  
+  // Sort by match score (highest first)
+  return matchedInternships.sort((a, b) => b.matchScore - a.matchScore);
 };
 
-// Analyze skill gaps
+/**
+ * Analyze skill gaps based on top internships
+ * @param userSkills The user's skills
+ * @returns A promise that resolves to an array of skill gaps with importance levels
+ */
 export const analyzeSkillGaps = async (userSkills: string[]): Promise<{skill: string, importance: 'High' | 'Medium' | 'Low'}[]> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  // Get all internships
+  const internships = await getAllInternships();
   
-  // Count skill frequency across all internships to determine importance
-  const skillFrequency: Record<string, number> = {};
+  // Normalize user skills to lowercase
+  const normalizedUserSkills = userSkills.map(skill => skill.toLowerCase());
+  
+  // Count skill occurrences across all internships
+  const skillOccurrences: Record<string, number> = {};
   
   internships.forEach(internship => {
     internship.requiredSkills.forEach(skill => {
-      skillFrequency[skill.toLowerCase()] = (skillFrequency[skill.toLowerCase()] || 0) + 1;
+      const normalizedSkill = skill.toLowerCase();
+      if (!normalizedUserSkills.includes(normalizedSkill)) {
+        skillOccurrences[normalizedSkill] = (skillOccurrences[normalizedSkill] || 0) + 1;
+      }
     });
   });
   
-  // Determine missing skills (not in user skills)
-  const userSkillsLower = userSkills.map(skill => skill.toLowerCase());
-  const allSkills = Object.keys(skillFrequency);
-  const missingSkills = allSkills.filter(skill => 
-    !userSkillsLower.some(userSkill => 
-      userSkill.includes(skill) || skill.includes(userSkill)
-    )
-  );
+  // Convert to array and sort by occurrence count
+  const skillGaps = Object.entries(skillOccurrences)
+    .map(([skill, count]) => ({
+      skill,
+      count,
+      importance: count >= 4 ? 'High' : count >= 2 ? 'Medium' : 'Low' as 'High' | 'Medium' | 'Low'
+    }))
+    .sort((a, b) => b.count - a.count);
   
-  // Determine importance based on frequency
-  const maxFrequency = Math.max(...Object.values(skillFrequency));
-  
-  return missingSkills.map(skill => {
-    const frequency = skillFrequency[skill] || 0;
-    const importance: 'High' | 'Medium' | 'Low' = 
-      frequency > maxFrequency * 0.7 ? 'High' :
-      frequency > maxFrequency * 0.4 ? 'Medium' : 'Low';
-    
-    return {
-      skill: skill.charAt(0).toUpperCase() + skill.slice(1), // Capitalize first letter
-      importance
-    };
-  }).sort((a, b) => {
-    // Sort by importance (High -> Medium -> Low)
-    const importanceValue = { 'High': 3, 'Medium': 2, 'Low': 1 };
-    return importanceValue[b.importance] - importanceValue[a.importance];
-  }).slice(0, 5); // Return top 5 skills to learn
+  // Return top skill gaps with importance levels
+  return skillGaps.slice(0, 10).map(({ skill, importance }) => ({ skill, importance }));
 };

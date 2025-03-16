@@ -3,39 +3,65 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Container with padding */
-.container-custom {
-  @apply container mx-auto px-4;
-}
-
-/* Text gradient */
-.text-gradient {
-  @apply bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent;
-}
-
-/* Button styles */
-.button-primary {
-  @apply px-6 py-3 bg-primary text-white rounded-lg font-medium transition-all hover:bg-primary/90 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-primary disabled:active:scale-100;
-}
-
-.button-secondary {
-  @apply px-6 py-3 bg-secondary/10 text-secondary rounded-lg font-medium transition-all hover:bg-secondary/20 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-secondary/10 disabled:active:scale-100;
-}
-
-.button-accent {
-  @apply px-6 py-3 bg-accent/90 text-white rounded-lg font-medium transition-all hover:bg-accent active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:bg-accent/90 disabled:active:scale-100;
-}
-
-/* Animation frames */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    
+    --primary: 173 100% 38%; /* Teal: #00C4B4 */
+    --primary-foreground: 210 40% 98%;
+    
+    --secondary: 240 5% 20%; /* Dark Gray: #333333 */
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    
+    --accent: 16 100% 56%; /* Orange: #FF5722 */
+    --accent-foreground: 210 40% 98%;
+    
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    
+    --radius: 0.5rem;
   }
-  50% {
-    opacity: 0.5;
-  }
 }
 
-.animate-pulse {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@layer components {
+  .container-custom {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  .button-primary {
+    @apply rounded-md bg-primary text-white px-4 py-2 font-medium hover:bg-primary/90 transition-colors 
+           focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50;
+  }
+  
+  .button-secondary {
+    @apply rounded-md bg-slate-100 text-secondary px-4 py-2 font-medium hover:bg-slate-200 transition-colors 
+           focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50;
+  }
+  
+  .button-accent {
+    @apply rounded-md bg-accent text-white px-4 py-2 font-medium hover:bg-accent/90 transition-colors 
+           focus:outline-none focus:ring-2 focus:ring-accent/50 disabled:opacity-50;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-200 hover:shadow-md hover:translate-y-[-2px];
+  }
 }

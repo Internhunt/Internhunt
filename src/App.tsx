@@ -1,8 +1,9 @@
 
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Index from "./pages/Index";
 import Upload from "./pages/Upload";
@@ -17,22 +18,24 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <UserProvider>
-      <BrowserRouter>
+    <TooltipProvider>
+      <UserProvider>
         <Toaster />
         <Sonner />
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/upload" element={<Upload />} />
-          <Route path="/matches" element={<Matches />} />
-          <Route path="/skill-gaps" element={<SkillGaps />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </UserProvider>
+        <BrowserRouter>
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/upload" element={<Upload />} />
+            <Route path="/matches" element={<Matches />} />
+            <Route path="/skill-gaps" element={<SkillGaps />} />
+            <Route path="/courses" element={<Courses />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </UserProvider>
+    </TooltipProvider>
   </QueryClientProvider>
 );
 

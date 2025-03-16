@@ -1,176 +1,168 @@
 
-interface Course {
+/**
+ * Course service
+ * Handles fetching course data and recommendations
+ */
+
+export interface Course {
   id: number;
   title: string;
   platform: string;
   duration: string;
   courseUrl: string;
-  imageUrl: string;
+  imageUrl?: string;
   skills: string[];
 }
 
-// Mock courses data
-const courses: Course[] = [
+// Mock course data
+// In a real app, this would come from an API
+const mockCourses: Course[] = [
   {
     id: 1,
-    title: "React.js: The Complete Guide",
-    platform: "Udemy",
-    duration: "40 hours",
-    courseUrl: "https://www.udemy.com/course/react-the-complete-guide-incl-redux",
-    imageUrl: "/placeholder.svg",
-    skills: ["react", "javascript", "redux", "web development"]
+    title: "Machine Learning Fundamentals",
+    platform: "Coursera",
+    duration: "8 weeks",
+    courseUrl: "https://example.com/course",
+    skills: ["machine learning", "python", "data analysis", "numpy", "pandas"]
   },
   {
     id: 2,
-    title: "Machine Learning A-Z",
-    platform: "Coursera",
-    duration: "60 hours",
-    courseUrl: "https://www.coursera.org/learn/machine-learning",
-    imageUrl: "/placeholder.svg",
-    skills: ["python", "machine learning", "data analysis", "tensorflow"]
+    title: "React.js Complete Guide",
+    platform: "Udemy",
+    duration: "24 hours",
+    courseUrl: "https://example.com/course",
+    skills: ["react", "javascript", "html", "css", "redux"]
   },
   {
     id: 3,
-    title: "Complete Python Bootcamp",
-    platform: "Udemy",
-    duration: "30 hours",
-    courseUrl: "https://www.udemy.com/course/complete-python-bootcamp",
-    imageUrl: "/placeholder.svg",
-    skills: ["python", "programming", "data structures", "algorithms"]
+    title: "Docker for Developers",
+    platform: "Pluralsight",
+    duration: "6 hours",
+    courseUrl: "https://example.com/course",
+    skills: ["docker", "devops", "containers", "kubernetes"]
   },
   {
     id: 4,
-    title: "AWS Certified Solutions Architect",
-    platform: "A Cloud Guru",
-    duration: "35 hours",
-    courseUrl: "https://acloudguru.com/course/aws-certified-solutions-architect-associate",
-    imageUrl: "/placeholder.svg",
-    skills: ["aws", "cloud computing", "devops", "infrastructure"]
+    title: "AWS Certified Developer",
+    platform: "AWS Training",
+    duration: "12 weeks",
+    courseUrl: "https://example.com/course",
+    skills: ["aws", "cloud", "serverless", "lambda", "s3", "ec2"]
   },
   {
     id: 5,
-    title: "The Complete JavaScript Course",
-    platform: "Udemy",
-    duration: "28 hours",
-    courseUrl: "https://www.udemy.com/course/the-complete-javascript-course",
-    imageUrl: "/placeholder.svg",
-    skills: ["javascript", "web development", "es6", "dom manipulation"]
+    title: "TypeScript Masterclass",
+    platform: "Frontend Masters",
+    duration: "8 hours",
+    courseUrl: "https://example.com/course",
+    skills: ["typescript", "javascript", "react", "node.js"]
   },
   {
     id: 6,
-    title: "UI/UX Design Bootcamp",
-    platform: "DesignLab",
-    duration: "24 weeks",
-    courseUrl: "https://www.designlab.com",
-    imageUrl: "/placeholder.svg",
-    skills: ["ui/ux", "figma", "sketch", "prototyping", "design thinking"]
+    title: "GraphQL API Development",
+    platform: "egghead.io",
+    duration: "4 hours",
+    courseUrl: "https://example.com/course",
+    skills: ["graphql", "api", "node.js", "apollo"]
   },
   {
     id: 7,
-    title: "Data Science Specialization",
-    platform: "Coursera",
-    duration: "10 courses, 6 months",
-    courseUrl: "https://www.coursera.org/specializations/jhu-data-science",
-    imageUrl: "/placeholder.svg",
-    skills: ["r", "statistics", "data analysis", "machine learning", "visualization"]
+    title: "Python for Data Science",
+    platform: "DataCamp",
+    duration: "20 hours",
+    courseUrl: "https://example.com/course",
+    skills: ["python", "data analysis", "pandas", "matplotlib", "jupyter"]
   },
   {
     id: 8,
     title: "Full Stack Web Development",
-    platform: "Pluralsight",
-    duration: "40+ hours",
-    courseUrl: "https://www.pluralsight.com/paths/full-stack-web-development",
-    imageUrl: "/placeholder.svg",
-    skills: ["html", "css", "javascript", "nodejs", "databases"]
+    platform: "Codecademy",
+    duration: "12 weeks",
+    courseUrl: "https://example.com/course",
+    skills: ["javascript", "html", "css", "node.js", "express", "mongodb"]
   },
   {
     id: 9,
-    title: "Docker and Kubernetes: The Complete Guide",
-    platform: "Udemy",
-    duration: "22 hours",
-    courseUrl: "https://www.udemy.com/course/docker-and-kubernetes-the-complete-guide",
-    imageUrl: "/placeholder.svg",
-    skills: ["docker", "kubernetes", "devops", "ci/cd", "containerization"]
+    title: "UI/UX Design Principles",
+    platform: "Interaction Design Foundation",
+    duration: "8 weeks",
+    courseUrl: "https://example.com/course",
+    skills: ["ui/ux", "figma", "user research", "wireframing", "prototyping"]
   },
   {
     id: 10,
-    title: "iOS App Development with Swift",
-    platform: "Apple Developer",
-    duration: "15 weeks",
-    courseUrl: "https://developer.apple.com/tutorials/app-dev-training",
-    imageUrl: "/placeholder.svg",
-    skills: ["swift", "ios", "mobile development", "xcode", "app design"]
+    title: "DevOps Engineering",
+    platform: "Linux Academy",
+    duration: "10 weeks",
+    courseUrl: "https://example.com/course",
+    skills: ["devops", "ci/cd", "jenkins", "docker", "kubernetes", "git"]
   }
 ];
 
-// Get all courses
+/**
+ * Get all courses
+ * @returns A promise that resolves to an array of courses
+ */
 export const getAllCourses = async (): Promise<Course[]> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 800));
-  return courses;
+  // In a real app, this would fetch from an API
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 500));
+  return mockCourses;
 };
 
-// Get courses by specific skill
+/**
+ * Get courses recommended for a specific skill
+ * @param skill The skill to find courses for
+ * @returns A promise that resolves to an array of recommended courses
+ */
 export const getCoursesBySkill = async (skill: string): Promise<Course[]> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  const courses = await getAllCourses();
   
-  const skillLower = skill.toLowerCase();
-  return courses.filter(course => 
-    course.skills.some(courseSkill => 
-      courseSkill.toLowerCase().includes(skillLower) || 
-      skillLower.includes(courseSkill.toLowerCase())
-    )
+  // Filter courses by skill
+  const normalizedSkill = skill.toLowerCase();
+  const matchedCourses = courses.filter(course => 
+    course.skills.some(courseSkill => courseSkill.toLowerCase().includes(normalizedSkill))
   );
+  
+  return matchedCourses;
 };
 
-// Get recommended courses based on skill gaps
+/**
+ * Get courses recommended for skill gaps
+ * @param skillGaps The skill gaps to address
+ * @returns A promise that resolves to an array of recommended courses
+ */
 export const getRecommendedCourses = async (
-  skillGaps: {skill: string, importance: 'High' | 'Medium' | 'Low'}[]
+  skillGaps: { skill: string; importance: string }[]
 ): Promise<Course[]> => {
-  // Simulate API call delay
-  await new Promise(resolve => setTimeout(resolve, 800));
+  const courses = await getAllCourses();
+  const recommendations: Course[] = [];
   
-  if (skillGaps.length === 0) {
-    return courses.slice(0, 6); // Return some default courses if no gaps
+  // Get high importance skills first
+  const prioritizedSkillGaps = [
+    ...skillGaps.filter(gap => gap.importance === 'High'),
+    ...skillGaps.filter(gap => gap.importance === 'Medium'),
+    ...skillGaps.filter(gap => gap.importance === 'Low')
+  ];
+  
+  // Find relevant courses for each skill gap
+  for (const gap of prioritizedSkillGaps) {
+    const normalizedSkill = gap.skill.toLowerCase();
+    
+    // Find courses that teach this skill
+    const relevantCourses = courses.filter(course => 
+      course.skills.some(courseSkill => courseSkill.toLowerCase().includes(normalizedSkill)) &&
+      !recommendations.some(rec => rec.id === course.id) // Avoid duplicates
+    );
+    
+    // Add the most relevant course
+    if (relevantCourses.length > 0) {
+      recommendations.push(relevantCourses[0]);
+    }
+    
+    // Limit to 6 recommendations
+    if (recommendations.length >= 6) break;
   }
   
-  // Extract skill names from gaps
-  const gapSkills = skillGaps.map(gap => gap.skill.toLowerCase());
-  
-  // Find courses that match the gap skills
-  const matchedCourses = courses.filter(course => 
-    course.skills.some(courseSkill => 
-      gapSkills.some(gapSkill => 
-        courseSkill.toLowerCase().includes(gapSkill) || 
-        gapSkill.includes(courseSkill.toLowerCase())
-      )
-    )
-  );
-  
-  // Prioritize courses for high importance skills
-  const highImportanceSkills = skillGaps
-    .filter(gap => gap.importance === 'High')
-    .map(gap => gap.skill.toLowerCase());
-  
-  return matchedCourses
-    .sort((a, b) => {
-      // Count matches with high importance skills
-      const aHighMatches = a.skills.filter(skill => 
-        highImportanceSkills.some(highSkill => 
-          skill.toLowerCase().includes(highSkill) || 
-          highSkill.includes(skill.toLowerCase())
-        )
-      ).length;
-      
-      const bHighMatches = b.skills.filter(skill => 
-        highImportanceSkills.some(highSkill => 
-          skill.toLowerCase().includes(highSkill) || 
-          highSkill.includes(skill.toLowerCase())
-        )
-      ).length;
-      
-      return bHighMatches - aHighMatches; // Sort by most matches with high importance skills
-    })
-    .slice(0, 6); // Return top 6 courses
+  return recommendations;
 };
